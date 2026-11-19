@@ -1,0 +1,25 @@
+# Configuración y datos de ejecución
+config/
+data/
+duberr-data/
+*.env
+.env
+.env.*
+!.env.example
+config.json
+estado-mezclas.json
+resultados.json
+acciones.json
+accion-en-curso.json
+webhook-token
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Copias de trabajo y restos
+*.antes-*
+*.obsoleto
+*.tmp
+*.log

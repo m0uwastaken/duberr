@@ -1,0 +1,16 @@
+.git
+.gitignore
+.dockerignore
+.env
+.env.*
+*.env
+config/
+data/
+__pycache__/
+*.pyc
+*.antes-*
+*.obsoleto
+*.md
+docs/
+LICENSE
+docker-compose*.yml

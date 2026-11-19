@@ -1,0 +1,54 @@
+# duberr · ejemplo de docker-compose. Cópialo a docker-compose.yml y ajusta las rutas y la red.
+#
+# AVISO: duberr es una herramienta para tu red local. NO la expongas a internet (ver SECURITY.md): sus acciones
+# lanzan ffmpeg/mkvmerge sobre tu biblioteca. Pon DUBERR_PASSWORD, o accede por VPN (Tailscale/WireGuard) o por un
+# proxy inverso con autenticación.
+#
+# Regla de oro de los volúmenes: monta la biblioteca en la MISMA ruta que usan Sonarr y Radarr (convención TRaSH:
+# todo bajo /data). Así las rutas que devuelven los *arr valen tal cual y no hace falta DUBERR_PATH_MAP. Además,
+# medios y descargas deben ser el mismo sistema de archivos para que los enlaces duros de la papelera funcionen.
+
+services:
+  duberr:
+    build: .                      # o la imagen que hayas construido: image: duberr:0.1.0
+    container_name: duberr
+    user: "1000:1000"             # el mismo uid:gid con el que corren tus *arr (así escribe en la biblioteca)
+    restart: unless-stopped
+    environment:
+      TZ: "Europe/Madrid"
+      # --- Sonarr / Radarr (obligatorio) ---
+      SONARR_URL: "${SONARR_URL:-http://sonarr:8989}"
+      SONARR_KEY: "${SONARR_KEY:-}"
+      RADARR_URL: "${RADARR_URL:-http://radarr:7878}"
+      RADARR_KEY: "${RADARR_KEY:-}"
+      # --- Rutas y comportamiento (todos opcionales) ---
+      DUBERR_DATA: "/duberr"                 # carpeta de datos (volumen de abajo)
+      DUBERR_MEDIA: "/data/media"            # raíz de tu biblioteca, tal como la ven Sonarr y Radarr
+      DUBERR_PROTECTED_DIRS: ""              # carpetas de solo lectura separadas por «:» (p. ej. /data/otra-carpeta)
+      DUBERR_PATH_MAP: ""                    # solo si los *arr ven otras rutas: «/tv=>/data/media/tv;/movies=>/data/media/movies»
+      DUBERR_BASE_PROFILE: ""                # perfil de calidad a clonar (vacío = «HD - 720p/1080p» o el primero que encaje)
+      DUBERR_CAST_FORMAT: "Castellano"       # formato personalizado de Sonarr/Radarr que marca el castellano
+      DUBERR_INTERVAL: "120"                 # segundos entre revisiones (el webhook las adelanta)
+      # --- Seguridad ---
+      DUBERR_PASSWORD: "${DUBERR_PASSWORD:-}"            # HTTP Basic (usuario cualquiera). Recomendado.
+      DUBERR_WEBHOOK_TOKEN: "${DUBERR_WEBHOOK_TOKEN:-}"  # vacío = se genera y se ve en Ajustes
+      DUBERR_BIND: "0.0.0.0"                 # dentro del contenedor; publica el puerto solo donde quieras (abajo)
+      DUBERR_PORT: "3005"
+      DUBERR_ALLOWED_ORIGINS: ""             # solo si hay un proxy que cambia el Host: «duberr.casa.lan,otro:8443»
+      # --- Avisos opcionales (ntfy) ---
+      NTFY_URL: "${NTFY_URL:-}"
+      NTFY_TOPIC: "${NTFY_TOPIC:-}"
+      NTFY_TOKEN: "${NTFY_TOKEN:-}"
+    volumes:
+      - ./duberr-data:/duberr                # config, audio guardado, estado y caché (haz copia de esto)
+      - /ruta/a/tus/datos:/data              # LA MISMA ruta que montan Sonarr y Radarr (biblioteca en /data/media)
+      # - /ruta/a/otra-carpeta:/data/otra-carpeta:ro    # si usas DUBERR_PROTECTED_DIRS, móntala en solo lectura
+    ports:
+      - "127.0.0.1:3005:3005"                # solo en este equipo; cámbialo por la IP de tu LAN si lo necesitas
+    networks:
+      - arr
+
+networks:
+  arr:
+    external: true                # la red de Docker que ya comparten tus Sonarr/Radarr (docker network ls)
+    name: arr
