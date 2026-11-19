@@ -1,16 +1,5 @@
 # duberr
 
-**English summary.** duberr is a small, dependency-light service (Python stdlib + numpy, ffmpeg, mkvtoolnix) that plugs
-into Sonarr and Radarr. For the series and movies you pick, it keeps the Spanish (Castilian) audio track of any copy
-that has one, and later muxes it, **without re-encoding**, into the best-quality copy your *arr apps manage to get
-(up to Bluray 1080p). It measures the offset/speed drift between both tracks before touching anything, never modifies
-an existing file in place, keeps the replaced file in an undoable trash (hardlink, N days) and has a web UI with
-audio preview. It integrates through the *arr API (quality profiles, queue, manual import), an optional webhook
-(instant reaction to imports) and a path mapping for different container volume layouts. The interface and this README are
-in Spanish; the project is MIT-licensed. **Not for exposure to the internet**: read [SECURITY.md](SECURITY.md).
-
----
-
 Servicio para Sonarr y Radarr que **conserva el audio en castellano** de cualquier versión que lo tenga y lo
 **mezcla, sin recodificar, con la mejor imagen disponible** (hasta Bluray 1080p). Pensado para quien monta su propia
 biblioteca con la suite *arr y quiere «la mejor calidad con el audio en castellano», sin hacerlo episodio a episodio
